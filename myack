@@ -1,0 +1,14 @@
+#!/bin/bash
+filename=$1
+pattern=$2
+
+hosts=(cspfdev006 cspfdev005 cspfdev004) # or host names
+user=game # your user on host
+log=/tmp/mylog                  # result of grepping
+
+for host in ${hosts[@]}; do
+    echo "== $host ==" >> $log
+    ssh -l $user $host "grep $pattern /data/game/log/sp.$filename.* 2>&1" >> $log
+done
+less $log                       # view result
+~                                                 
