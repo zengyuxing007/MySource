@@ -1,14 +1,35 @@
 #!/bin/bash
-filename=$1
-pattern=$2
-
-hosts=(cspfdev006 cspfdev005 cspfdev004) # or host names
+pattern=$1
+filename=$2
+date=$3
+lessmode=$4
+#csmi001,csmi002,csmm001,csmpo003,csmpo004,csmr001,csmu002,csmu004,csmu008,csmw001,csmw002,csmw003,csmw004,csmw010,csmw011
+hosts=(csmw001 csmw002 csmw003 csmw004 csmw010 csmw011 csmpo003 csmpo004) # or host names
 user=game # your user on host
-log=/tmp/mylog                  # result of grepping
+log="/tmp/mylog_${RANDOM}"                 # result of grepping
+if [ $date ]
+then
+   echo "date is $date"
+else
+   date=`date +"%Y%m%d"`
+   echo "date is $date"
+fi
+
+echo "" > $log   #empty the local log file 
 
 for host in ${hosts[@]}; do
-    echo "== $host ==" >> $log
-    ssh -l $user $host "grep $pattern /data/game/log/sp.$filename.* 2>&1" >> $log
+{
+    echo "== $host ==" > $log.$host
+    ssh -l $user $host "ack $pattern /data/game/log/sp.$filename.log.$date 2>&1" >> $log.$host
+} &
 done
-less $log                       # view result
-~                                                 
+wait
+cat $log.* > $log
+rm $log.*
+
+if [ $lessmode ]
+then
+   less $log                               # less mode
+else
+   ack $pattern $log                       # view result
+fi
